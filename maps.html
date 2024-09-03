@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Set Locations by Clicking on Map</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyACALf_Um0uXhkW_kBhXptMqw9CYHRMlEs"></script>
+    <script>
+        var map;
+        var markers = [];
+        var directionsService;
+        var directionsRenderer;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 6,
+                center: { lat: 37.7749, lng: -122.4194 } // Initial center, e.g., San Francisco
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map
+            });
+
+            // Add a click event listener to the map
+            map.addListener('click', function(event) {
+                addMarker(event.latLng);
+                if (markers.length > 1) {
+                    calculateAndDisplayRoute();
+                }
+            });
+        }
+
+        function addMarker(location) {
+            var marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+            markers.push(marker);
+        }
+
+        function calculateAndDisplayRoute() {
+            var waypoints = markers.slice(1, -1).map(function(marker) {
+                return {
+                    location: marker.getPosition(),
+                    stopover: true
+                };
+            });
+
+            directionsService.route({
+                origin: markers[0].getPosition(),
+                destination: markers[markers.length - 1].getPosition(),
+                waypoints: waypoints,
+                optimizeWaypoints: true,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, function(response, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setDirections(response);
+                } else {
+                    window.alert('Directions request failed due to ' + status);
+                }
+            });
+        }
+
+        function clearMarkers() {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            markers = [];
+            directionsRenderer.set('directions', null);
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div id="map" style="height: 500px; width: 100%;"></div>
+    <button onclick="clearMarkers()">Clear Markers</button>
+</body>
+</html>

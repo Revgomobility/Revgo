@@ -30,7 +30,7 @@ if (!empty($_POST)) {
 }
 if (empty($errors)) {
         // Recipient email address (replace with your own)
-        $recipient = "hello@revgo.xyz";
+        $recipient = "kalyaan@revgo.xyz";
 
         // Additional headers
         $headers = "From: $name <$email>";

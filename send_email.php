@@ -20,9 +20,11 @@ If you add a form field, you will need to add it here.
 $email_address = $_REQUEST['email'] ;
 $message = $_REQUEST['message'] ;
 $first_name = $_REQUEST['name'] ;
+$vehicle = $REQUEST['taskOption'] ;
 $msg = 
 "Name: " . $first_name . "\r\n" . 
 "Email: " . $email_address . "\r\n" . 
+"Vehicle Chosen: " . $vehicle . "\r\n" .
 "Comments: " . @message ;
 
 /*

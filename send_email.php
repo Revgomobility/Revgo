@@ -6,6 +6,7 @@ if (!empty($_POST)) {
   $name = $_POST['name'];
   $email = $_POST['email'];
   $mobile = $_POST['mobile'];
+  $message = $_POST['message'];
   $option = isset($_POST['taskOption']) ? $_POST['taskOption'] : false;
    if ($option) {
       echo htmlentities($_POST['taskOption'], ENT_QUOTES, "UTF-8");
@@ -36,7 +37,7 @@ if (empty($errors)) {
         $headers = "From: $name <$email>";
 
         // Send email
-        if (mail($recipient, $message, $headers)) {
+        if (mail($recipient, $message, $option, $headers)) {
             echo "Email sent successfully!";
         } else {
             echo "Failed to send email. Please try again later.";

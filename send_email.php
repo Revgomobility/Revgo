@@ -1,57 +1,76 @@
 <?php
+/*
+This first bit sets the email address that you want the form to be submitted to.
+You will need to change this value to a valid email address that you can access.
+*/
+$webmaster_email = "hello@revgo.xyz";
 
-$errors = [];
+/*
+This bit sets the URLs of the supporting pages.
+If you change the names of any of the pages, you will need to change the values here.
+*/
+$feedback_page = "404.html";
+$error_page = "404.html";
+$thankyou_page = "index.html";
 
-if (!empty($_POST)) {
-  $name = $_POST['name'];
-  $email = $_POST['email'];
-  $mobile = $_POST['mobile'];
-  $message = $_POST['message'];
-  $option = isset($_POST['taskOption']) ? $_POST['taskOption'] : false;
-   if ($option) {
-      echo htmlentities($_POST['taskOption'], ENT_QUOTES, "UTF-8");
-   } else {
-     echo "task option is required";
-     exit; 
-   }
- 
-  if (empty($name)) {
-      $errors[] = 'Name is empty';
-  }
+/*
+This next bit loads the form field data into variables.
+If you add a form field, you will need to add it here.
+*/
+$email_address = $_REQUEST['email'] ;
+$message = $_REQUEST['message'] ;
+$first_name = $_REQUEST['name'] ;
+$msg = 
+"Name: " . $first_name . "\r\n" . 
+"Email: " . $email_address . "\r\n" . 
+"Comments: " . @message ;
 
-  if (empty($email)) {
-      $errors[] = 'Email is empty';
-  } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      $errors[] = 'Email is invalid';
-  }
-
-  if (empty($mobile)) {
-      $errors[] = 'Phone number is empty';
-  }
+/*
+The following function checks for email injection.
+Specifically, it checks for carriage returns - typically used by spammers to inject a CC list.
+*/
+function isInjected($str) {
+	$injections = array('(\n+)',
+	'(\r+)',
+	'(\t+)',
+	'(%0A+)',
+	'(%0D+)',
+	'(%08+)',
+	'(%09+)'
+	);
+	$inject = join('|', $injections);
+	$inject = "/$inject/i";
+	if(preg_match($inject,$str)) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
-if (empty($errors)) {
-        // Recipient email address (replace with your own)
-        $recipient = "kalyaan@revgo.xyz";
 
-        // Additional headers
-        $headers = "From: $name <$email>";
+// If the user tries to access this script directly, redirect them to the feedback form,
+if (!isset($_REQUEST['email'])) {
+header( "Location: $feedback_page" );
+}
 
-        // Send email
-        if (mail($recipient, $message, $option, $headers)) {
-            echo "Email sent successfully!";
-        } else {
-            echo "Failed to send email. Please try again later.";
-        }
-    } else {
-        // Display errors
-        echo "The form contains the following errors:<br>";
-        foreach ($errors as $error) {
-            echo "- $error<br>";
-        }
-    }
-} else {
-    // Not a POST request, display a 403 forbidden error
-    header("HTTP/1.1 403 Forbidden");
-    echo "You are not allowed to access this page.";
+// If the form fields are empty, redirect to the error page.
+elseif (empty($first_name) || empty($email_address)) {
+header( "Location: $error_page" );
+}
+
+/* 
+If email injection is detected, redirect to the error page.
+If you add a form field, you should add it here.
+*/
+elseif ( isInjected($email_address) || isInjected($first_name)  || isInjected($comments) ) {
+header( "Location: $error_page" );
+}
+
+// If we passed all previous tests, send the email then redirect to the thank you page.
+else {
+
+	mail( "$webmaster_email", "Feedback Form Results", $msg );
+
+	header( "Location: $thankyou_page" );
 }
 ?>

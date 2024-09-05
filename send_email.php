@@ -1,78 +1,45 @@
 <?php
-/*
-This first bit sets the email address that you want the form to be submitted to.
-You will need to change this value to a valid email address that you can access.
-*/
-$webmaster_email = "hello@revgo.xyz";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Retrieve form data and sanitize inputs
+    $name = htmlspecialchars(trim($_POST['name']));
+    $email = filter_var(trim($_POST['email']), FILTER_VALIDATE_EMAIL);
+    $mobile = htmlspecialchars(trim($_POST['mobile']));
+    $vehicle = htmlspecialchars(trim($_POST['vehicle']));
+    $message = htmlspecialchars(trim($_POST['message']));
 
-/*
-This bit sets the URLs of the supporting pages.
-If you change the names of any of the pages, you will need to change the values here.
-*/
-$feedback_page = "404.html";
-$error_page = "404.html";
-$thankyou_page = "index.html";
+    // Check if the vehicle mode is selected
+    if ($vehicle == "Select A Mode") {
+        echo "Please select a vehicle mode.";
+        exit;
+    }
 
-/*
-This next bit loads the form field data into variables.
-If you add a form field, you will need to add it here.
-*/
-$email_address = $_REQUEST['email'] ;
-$message = $_REQUEST['message'] ;
-$first_name = $_REQUEST['name'] ;
-$vehicle = $REQUEST['taskOption'] ;
-$msg = 
-"Name: " . $first_name . "\r\n" . 
-"Email: " . $email_address . "\r\n" . 
-"Vehicle Chosen: " . $vehicle . "\r\n" .
-"Comments: " . @message ;
+    // Validate inputs
+    if (!$name || !$email || !$mobile || !$vehicle || !$message) {
+        echo "All fields are required, please fill out the form completely.";
+        exit;
+    }
 
-/*
-The following function checks for email injection.
-Specifically, it checks for carriage returns - typically used by spammers to inject a CC list.
-*/
-function isInjected($str) {
-	$injections = array('(\n+)',
-	'(\r+)',
-	'(\t+)',
-	'(%0A+)',
-	'(%0D+)',
-	'(%08+)',
-	'(%09+)'
-	);
-	$inject = join('|', $injections);
-	$inject = "/$inject/i";
-	if(preg_match($inject,$str)) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+    // Email settings
+    $to = 'hello@revgo.xyz'; // Change this to your receiving email address
+    $subject = 'New Querry';
+    $headers = "From: $email\r\n";
+    $headers .= "Reply-To: $email\r\n";
+    $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
 
-// If the user tries to access this script directly, redirect them to the feedback form,
-if (!isset($_REQUEST['email'])) {
-header( "Location: $feedback_page" );
-}
+    // Email message content
+    $email_message = "Name: $name\n";
+    $email_message .= "Email: $email\n";
+    $email_message .= "Mobile: $mobile\n";
+    $email_message .= "Vehicle Mode: $vehicle\n";
+    $email_message .= "Message:\n$message\n";
 
-// If the form fields are empty, redirect to the error page.
-elseif (empty($first_name) || empty($email_address)) {
-header( "Location: $error_page" );
-}
-
-/* 
-If email injection is detected, redirect to the error page.
-If you add a form field, you should add it here.
-*/
-elseif ( isInjected($email_address) || isInjected($first_name)  || isInjected($comments) ) {
-header( "Location: $error_page" );
-}
-
-// If we passed all previous tests, send the email then redirect to the thank you page.
-else {
-
-	mail( "$webmaster_email", "Feedback Form Results", $msg );
-
-	header( "Location: $thankyou_page" );
+    // Send the email
+    if (mail($to, $subject, $email_message, $headers)) {
+        echo "Thank you for contacting us! Your message has been sent.";
+    } else {
+        echo "Sorry, something went wrong. Please try again later.";
+    }
+} else {
+    echo "Invalid request method.";
 }
 ?>

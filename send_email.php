@@ -1,33 +1,27 @@
 <?php
-// Enable error reporting for debugging (remove or comment out in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    // Retrieve and sanitize form data
+    // Retrieve form data and sanitize inputs
     $name = htmlspecialchars(trim($_POST['name']));
     $email = filter_var(trim($_POST['email']), FILTER_VALIDATE_EMAIL);
     $mobile = htmlspecialchars(trim($_POST['mobile']));
     $vehicle = htmlspecialchars(trim($_POST['vehicle']));
     $message = htmlspecialchars(trim($_POST['message']));
 
-    // Validate vehicle mode
-    if ($vehicle === "Select A Mode") {
+    // Check if the vehicle mode is selected
+    if ($vehicle == "Select A Mode") {
         echo "Please select a vehicle mode.";
         exit;
     }
 
-    // Validate all fields
+    // Validate inputs
     if (!$name || !$email || !$mobile || !$vehicle || !$message) {
         echo "All fields are required, please fill out the form completely.";
         exit;
     }
 
     // Email settings
-    $to = 'hello@revgo.xyz'; // Your receiving email address
-    $subject = 'New Query'; // Changed typo from 'Querry' to 'Query'
+    $to = 'hello@revgo.xyz'; // Change this to your receiving email address
+    $subject = 'New Querry';
     $headers = "From: $email\r\n";
     $headers .= "Reply-To: $email\r\n";
     $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
@@ -45,9 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         echo "Sorry, something went wrong. Please try again later.";
     }
-
 } else {
     echo "Invalid request method.";
 }
-
 ?>
